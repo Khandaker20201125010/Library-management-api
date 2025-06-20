@@ -44,12 +44,7 @@ bookRoutes.post("/", async (req: Request, res: Response) => {
 
 bookRoutes.get("/", async (req: Request, res: Response) => {
   try {
-    const {
-      filter,
-      sortBy = "createdAt",
-      sort = "asc",
-      limit = "10",
-    } = req.query;
+    const { filter,  sortBy = "createdAt", sort = "asc", limit = "10", } = req.query;
 
     const query: any = {};
     if (filter) {
@@ -100,6 +95,66 @@ bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: "Failed to retrieve book",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+
+bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
+  try {
+    const bookId = req.params.bookId;
+    const updateData = req.body;
+
+    const updatedBook = await bookModel.findByIdAndUpdate(bookId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedBook) {
+      res.status(404).json({
+        success: false,
+        message: "Book not found",
+        error: null,
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Book retrieved successfully",
+      data: updatedBook,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to update book",
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+});
+bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
+  try {
+    const bookId = req.params.bookId;
+
+    const deletedBook = await bookModel.findByIdAndDelete(bookId);
+
+    if (!deletedBook) {
+      res.status(404).json({
+        success: false,
+        message: `Book with ID ${bookId} not found`,
+        data: null,
+      });
+      return;
+    }
+    res.status(200).json({
+      success: true,
+      message: "Book deleted successfully",
+      data: null,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete book",
       error: error instanceof Error ? error.message : "Unknown error",
     });
   }
