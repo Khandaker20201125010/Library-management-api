@@ -16,7 +16,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "mongodb": "^6.17.0",
-    "mongoose": "^8.16.0"
+    "mongoose": "^8.16.0",
+    "zod": "^3.26.0-canary.20250619T152955"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
