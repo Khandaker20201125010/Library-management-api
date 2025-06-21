@@ -82,9 +82,6 @@ src/
 ├── app.ts # Express app setup, routes
 ├── server.ts # Server entry point
 
-├── config/
-│ └── db.ts # MongoDB connection
-
 ├── models/
 │ ├── books/ # Book model
 │ └── borrow/ # Borrow model
