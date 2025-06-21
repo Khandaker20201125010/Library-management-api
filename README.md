@@ -79,25 +79,26 @@ npx tsc --init
 
 ## Folder & File Structure 
 src/
-│
-├── app.ts # Express app setup , routes
+├── app.ts # Express app setup, routes
 ├── server.ts # Server entry point
-│
-├app── config/
+
+├── config/
 │ └── db.ts # MongoDB connection
-│
-├app── models/
-│       ├── books/ # Book model 
-│       └── borrow/ # Borrow model 
-│app-controller
-│       ├── books/ # controller
-│       └── borrow/ # controller
+
+├── models/
+│ ├── books/ # Book model
+│ └── borrow/ # Borrow model
+
+├── controllers/
+│ ├── books/ # Book controllers
+│ └── borrow/ # Borrow controllers
+
 ├── utils/
-│ └── errorHandler.ts 
-│
-├── interfaces/ # TypeScript interfaces
-└──   ├── books/ # Book interfaces
-│     └── borrow/ # Borrow interfaces
+│ └── errorHandler.ts # Centralized error handler
+
+├── interfaces/
+│ ├── books/ # Book interfaces
+│ └── borrow/ # Borrow interfaces
 
 ### 5. Add Scripts to package.json
 
