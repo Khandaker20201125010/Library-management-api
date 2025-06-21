@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import bookModel from "../models/book.model";
 import { z } from "zod";
+import { handleError } from "../../utils/errorHandler";
 
 export const bookRoutes = express.Router();
 
@@ -26,25 +27,22 @@ bookRoutes.post("/", async (req: Request, res: Response) => {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        error: error.flatten(),
-      });
+      handleError(res, 400, "Validation failed", error);
       return;
     }
 
-    res.status(500).json({
-      success: false,
-      message: "Failed to create book",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    handleError(res, 500, "Failed to create book", error);
   }
 });
 
 bookRoutes.get("/", async (req: Request, res: Response) => {
   try {
-    const { filter,  sortBy = "createdAt", sort = "asc", limit = "10", } = req.query;
+    const {
+      filter,
+      sortBy = "createdAt",
+      sort = "asc",
+      limit = "10",
+    } = req.query;
 
     const query: any = {};
     if (filter) {
@@ -64,11 +62,7 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
       data: books,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to retrieve books",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    handleError(res, 500, "Failed to retrieve books", error);
   }
 });
 
@@ -92,11 +86,7 @@ bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
       data: book,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to retrieve book",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    handleError(res, 500, "Failed to retrieve books", error);
   }
 });
 
@@ -125,11 +115,7 @@ bookRoutes.put("/:bookId", async (req: Request, res: Response) => {
       data: updatedBook,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to update book",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    handleError(res, 500, "Failed to retrieve books", error);
   }
 });
 bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
@@ -152,10 +138,6 @@ bookRoutes.delete("/:bookId", async (req: Request, res: Response) => {
       data: null,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete book",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
+    handleError(res, 500, "Failed to retrieve books", error);
   }
 });

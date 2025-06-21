@@ -46,5 +46,9 @@ const bookSchema = new Schema<IBook>(
     timestamps: true
   }
 );
+bookSchema.methods.updateAvailability = function () {
+  this.available = this.copies > 0;
+  return this.save();
+};
 
 export default mongoose.model<IBook>('Book', bookSchema);

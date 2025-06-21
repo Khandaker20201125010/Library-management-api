@@ -1,4 +1,4 @@
-export interface IBook  {
+export interface IBook{
   title: string;
   author: string;
   genre: string;
@@ -8,4 +8,5 @@ export interface IBook  {
   available: boolean;
   createdAt: Date;
   updatedAt: Date;
-} 
+  updateAvailability(): Promise<this>;
+}
