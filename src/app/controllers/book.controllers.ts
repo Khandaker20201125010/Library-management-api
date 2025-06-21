@@ -41,7 +41,7 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
       filter,
       sortBy = "createdAt",
       sort = "asc",
-      limit = "10",
+      limit,
     } = req.query;
 
     const query: any = {};
@@ -51,10 +51,17 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
 
     const sortOrder = sort === "desc" ? -1 : 1;
 
-    const books = await bookModel
-      .find(query)
-      .sort({ [sortBy as string]: sortOrder })
-      .limit(parseInt(limit as string));
+    let findQuery = bookModel.find(query).sort({ [sortBy as string]: sortOrder });
+
+    // Only apply limit if explicitly provided
+    if (limit !== undefined) {
+      const parsedLimit = parseInt(limit as string);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        findQuery = findQuery.limit(parsedLimit);
+      }
+    }
+
+    const books = await findQuery;
 
     res.status(200).json({
       success: true,
@@ -65,6 +72,7 @@ bookRoutes.get("/", async (req: Request, res: Response) => {
     handleError(res, 500, "Failed to retrieve books", error);
   }
 });
+
 
 bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
   try {
