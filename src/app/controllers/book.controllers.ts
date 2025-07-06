@@ -37,42 +37,42 @@ bookRoutes.post("/", async (req: Request, res: Response) => {
 
 bookRoutes.get("/", async (req: Request, res: Response) => {
   try {
-    const {
-      filter,
-      sortBy = "createdAt",
-      sort = "asc",
-      limit,
-    } = req.query;
+    const filter = req.query.filter ? { genre: req.query.filter } : {};
+    const sortBy = (req.query.sortBy as string) || "createdAt";
+    
+    const sortA =
+      req.query.sort === "asc" || req.query.sort === "desc"
+        ? req.query.sort
+        : "desc";
+    const sortOrder = sortA === "desc" ? -1 : 1;
 
-    const query: any = {};
-    if (filter) {
-      query.genre = filter.toString().toUpperCase();
-    }
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 6;
+    const skip = (page - 1) * limit;
 
-    const sortOrder = sort === "desc" ? -1 : 1;
+    const total = await bookModel.countDocuments(filter);
 
-    let findQuery = bookModel.find(query).sort({ [sortBy as string]: sortOrder });
-
-    // Only apply limit if explicitly provided
-    if (limit !== undefined) {
-      const parsedLimit = parseInt(limit as string);
-      if (!isNaN(parsedLimit) && parsedLimit > 0) {
-        findQuery = findQuery.limit(parsedLimit);
-      }
-    }
-
-    const books = await findQuery;
+    const books = await bookModel
+      .find(filter)
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
-      message: "Books retrieved successfully",
+      message: "Books retrieved successfully 📚",
       data: books,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     handleError(res, 500, "Failed to retrieve books", error);
   }
 });
-
 
 bookRoutes.get("/:bookId", async (req: Request, res: Response) => {
   try {
