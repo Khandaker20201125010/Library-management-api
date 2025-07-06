@@ -41,9 +41,13 @@ exports.borrowRoutes.post("/", (req, res) => __awaiter(void 0, void 0, void 0, f
         (0, errorHandler_1.handleError)(res, 500, "Failed to borrow book", error);
     }
 }));
-exports.borrowRoutes.get("/", (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.borrowRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const summary = yield borrow_model_1.default.aggregate([
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        // Full aggregation with pagination
+        const fullSummary = yield borrow_model_1.default.aggregate([
             {
                 $group: {
                     _id: "$book",
@@ -70,10 +74,18 @@ exports.borrowRoutes.get("/", (_req, res) => __awaiter(void 0, void 0, void 0, f
                 },
             },
         ]);
+        const total = fullSummary.length;
+        const paginated = fullSummary.slice(skip, skip + limit);
         res.status(200).json({
             success: true,
             message: "Borrowed books summary retrieved successfully",
-            data: summary,
+            data: paginated,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
         });
     }
     catch (error) {

@@ -47,25 +47,31 @@ exports.bookRoutes.post("/", (req, res) => __awaiter(void 0, void 0, void 0, fun
 }));
 exports.bookRoutes.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { filter, sortBy = "createdAt", sort = "asc", limit, } = req.query;
-        const query = {};
-        if (filter) {
-            query.genre = filter.toString().toUpperCase();
-        }
-        const sortOrder = sort === "desc" ? -1 : 1;
-        let findQuery = book_model_1.default.find(query).sort({ [sortBy]: sortOrder });
-        // Only apply limit if explicitly provided
-        if (limit !== undefined) {
-            const parsedLimit = parseInt(limit);
-            if (!isNaN(parsedLimit) && parsedLimit > 0) {
-                findQuery = findQuery.limit(parsedLimit);
-            }
-        }
-        const books = yield findQuery;
+        const filter = req.query.filter ? { genre: req.query.filter } : {};
+        const sortBy = req.query.sortBy || "createdAt";
+        const sortA = req.query.sort === "asc" || req.query.sort === "desc"
+            ? req.query.sort
+            : "desc";
+        const sortOrder = sortA === "desc" ? -1 : 1;
+        const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+        const limit = req.query.limit ? parseInt(req.query.limit, 10) : 6;
+        const skip = (page - 1) * limit;
+        const total = yield book_model_1.default.countDocuments(filter);
+        const books = yield book_model_1.default
+            .find(filter)
+            .sort({ [sortBy]: sortOrder })
+            .skip(skip)
+            .limit(limit);
         res.status(200).json({
             success: true,
-            message: "Books retrieved successfully",
+            message: "Books retrieved successfully 📚",
             data: books,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
         });
     }
     catch (error) {

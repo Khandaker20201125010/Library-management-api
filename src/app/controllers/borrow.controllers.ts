@@ -34,9 +34,14 @@ borrowRoutes.post("/", async (req: Request, res: Response) => {
   }
 });
 
-borrowRoutes.get("/", async (_req: Request, res: Response) => {
+borrowRoutes.get("/", async (req: Request, res: Response) => {
   try {
-    const summary = await borrowModel.aggregate([
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
+    const skip = (page - 1) * limit;
+
+    // Full aggregation with pagination
+    const fullSummary = await borrowModel.aggregate([
       {
         $group: {
           _id: "$book",
@@ -64,12 +69,22 @@ borrowRoutes.get("/", async (_req: Request, res: Response) => {
       },
     ]);
 
+    const total = fullSummary.length;
+    const paginated = fullSummary.slice(skip, skip + limit);
+
     res.status(200).json({
       success: true,
       message: "Borrowed books summary retrieved successfully",
-      data: summary,
+      data: paginated,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     handleError(res, 500, "Failed to retrieve summary", error);
   }
 });
+
